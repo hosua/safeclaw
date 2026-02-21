@@ -4,9 +4,12 @@
   "description": "Sandboxed Docker container running Claude Code",
   "scripts": {
     "build": "./scripts/build.sh",
-    "start": "./scripts/run.sh",
     "start:claude": "./scripts/run.sh -a claude",
     "start:cursor": "./scripts/run.sh -a cursor",
+    "list": "docker ps --filter name=safeclaw*",
+    "stop-all": "docker stop $(docker ps -aq --filter \"name=safeclaw*\")",
+    "kill-all": "docker rm $(docker ps -aq --filter \"name=safeclaw*\")",
+    "purge": "npm run stop-all && npm run kill-all",
     "mount": "./scripts/run.sh -v",
     "setup-gemini": "./scripts/setup-gemini.sh",
     "setup-slack": "./scripts/setup-slack.sh",

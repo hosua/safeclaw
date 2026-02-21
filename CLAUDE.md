@@ -47,7 +47,7 @@ Use `-v` to mount a local directory into the container. Keep the same folder nam
 ./scripts/run.sh -s myproject -n -v /path/to/myproject:/home/sclaw/myproject
 ```
 
-This mounts the project at `/home/sclaw/myproject` inside the container. Use the same folder name (not a generic "project") so it's clear which project you're working with. If the container already exists, it will be recreated with the new mount.
+This mounts the project at `/home/sclaw/myproject` inside the container. Use the same folder name (not a generic "project") so it's clear which project you're working with. If the container already exists, it will be recreated with the new mount. The container runs as your host user's UID/GID so you can create branches, commit, and edit files on mounted volumes without permission issues.
 
 ## Research sessions
 
