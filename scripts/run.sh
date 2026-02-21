@@ -1,12 +1,16 @@
 #!/bin/bash
 # Start/reuse container, inject auth tokens, start ttyd web terminal
 
+VOLUME_MOUNT=""
+if [ -f .volumes ]; then
+    VOLUME_MOUNT="$(cat .volumes)"
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SAFECLAW_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/safeclaw"
 SECRETS_DIR="$SAFECLAW_DIR/.secrets"
 SESSIONS_DIR="$SAFECLAW_DIR/sessions"
 SESSION_NAME=""
-VOLUME_MOUNT=""
 NO_OPEN=false
 QUERY=""
 AGENT="claude"
@@ -14,25 +18,25 @@ AGENT="claude"
 # Parse arguments
 while getopts "s:v:nq:a:" opt; do
     case $opt in
-        s)
-            SESSION_NAME="$OPTARG"
-            ;;
-        v)
-            VOLUME_MOUNT="$OPTARG"
-            ;;
-        n)
-            NO_OPEN=true
-            ;;
-        q)
-            QUERY="$OPTARG"
-            ;;
-        a)
-            AGENT="$OPTARG"
-            ;;
-        *)
-            echo "Usage: $0 [-s session_name] [-v /host/path:/container/path] [-n] [-q \"question\"] [-a claude|cursor]"
-            exit 1
-            ;;
+    s)
+        SESSION_NAME="$OPTARG"
+        ;;
+    v)
+        VOLUME_MOUNT="$OPTARG"
+        ;;
+    n)
+        NO_OPEN=true
+        ;;
+    q)
+        QUERY="$OPTARG"
+        ;;
+    a)
+        AGENT="$OPTARG"
+        ;;
+    *)
+        echo "Usage: $0 [-s session_name] [-v /host/path:/container/path] [-n] [-q \"question\"] [-a claude|cursor]"
+        exit 1
+        ;;
     esac
 done
 
@@ -70,7 +74,7 @@ fi
 # If volume mount requested and container exists, remove it to recreate with new mount
 if [ -n "$VOLUME_MOUNT" ] && docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo "Volume mount requested. Removing existing container..."
-    docker rm -f "$CONTAINER_NAME" > /dev/null
+    docker rm -f "$CONTAINER_NAME" >/dev/null
 fi
 
 # Check if container exists
@@ -83,7 +87,7 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         sleep 1
     else
         echo "Starting existing container: $CONTAINER_NAME"
-        docker start "$CONTAINER_NAME" > /dev/null
+        docker start "$CONTAINER_NAME" >/dev/null
     fi
 else
     echo "Creating container: $CONTAINER_NAME"
@@ -106,7 +110,12 @@ else
         echo "Mounting Chrome extension socket: $CHROME_SOCKET_DIR"
     fi
 
-    docker run -d --ipc=host --name "$CONTAINER_NAME" -p 127.0.0.1:${PORT}:7681 $VOLUME_FLAGS safeclaw sleep infinity > /dev/null
+    docker run -d --ipc=host \
+        --name $CONTAINER_NAME \
+        -p 127.0.0.1:${PORT}:7681 \
+        -p 8787:8787 \
+        $VOLUME_FLAGS \
+        safeclaw sleep infinity >/dev/null
 fi
 
 # === Claude Code token setup ===
@@ -129,7 +138,7 @@ if [ ! -f "$SECRETS_DIR/CLAUDE_CODE_OAUTH_TOKEN" ]; then
     while true; do
         read -p "Token: " claude_token
         if [ -n "$claude_token" ]; then
-            echo "$claude_token" > "$SECRETS_DIR/CLAUDE_CODE_OAUTH_TOKEN"
+            echo "$claude_token" >"$SECRETS_DIR/CLAUDE_CODE_OAUTH_TOKEN"
             echo "Saved."
             break
         fi
@@ -160,7 +169,7 @@ if [ ! -f "$SECRETS_DIR/GH_TOKEN" ]; then
     read -p "Token: " gh_token
 
     if [ -n "$gh_token" ]; then
-        echo "$gh_token" > "$SECRETS_DIR/GH_TOKEN"
+        echo "$gh_token" >"$SECRETS_DIR/GH_TOKEN"
         echo "Saved."
     else
         echo "No token provided, skipping. You can set it up later by re-running this script."
@@ -177,6 +186,13 @@ for secret_file in "$SECRETS_DIR"/*; do
 done
 docker exec "$CONTAINER_NAME" sh -c "echo 'export SAFECLAW_AGENT=${AGENT}' >> /home/sclaw/.env"
 docker exec "$CONTAINER_NAME" sh -c "echo '${AGENT}' > /home/sclaw/.safeclaw-agent"
+
+if [ -f "$SAFECLAW_DIR/mcp.json" ]; then
+    docker exec $CONTAINER_NAME mkdir -p /home/sclaw/.claude
+    docker exec $CONTAINER_NAME mkdir -p /home/sclaw/.cursor
+    docker cp $SAFECLAW_DIR/mcp.json $CONTAINER_NAME:/home/sclaw/.claude/mcp.json
+    docker cp $SAFECLAW_DIR/mcp.json $CONTAINER_NAME:/home/sclaw/.cursor/mcp.json
+fi
 
 # Set git config from GitHub account if logged in
 if [ -f "$SECRETS_DIR/GH_TOKEN" ]; then
