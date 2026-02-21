@@ -83,7 +83,7 @@ RUN mkdir -p /home/sclaw/.claude/scripts && \
 RUN curl -fsSL https://claude.ai/install.sh | bash -s -- ${CLAUDE_CODE_VERSION}
 
 RUN bash -l -c 'curl -fsSL https://cursor.com/install | bash' && \
-    bash -l -c 'agent_path=$(command -v agent); [ -n "$agent_path" ] && ln -sf "$agent_path" /home/sclaw/.local/bin/cursor'
+    bash -l -c 'agent_path=$(command -v agent); [ -n "$agent_path" ] && ln -sf "$agent_path" /home/sclaw/.local/bin/cursor-agent'
 
 # === SETUP Claude Code ===
 

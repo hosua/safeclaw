@@ -3,11 +3,11 @@
 
 [ -f /home/sclaw/.env ] && . /home/sclaw/.env
 if [ -f /home/sclaw/.safeclaw-agent ]; then
-    agent=$(tr -d '\n' < /home/sclaw/.safeclaw-agent)
+    agent=$(tr -d '\n' </home/sclaw/.safeclaw-agent)
 fi
 agent="${agent:-${SAFECLAW_AGENT:-claude}}"
 if [ "$agent" = "cursor" ]; then
-    cmd="cursor"
+    cmd="cursor-agent --model=auto --yolo --approve-mcps"
 else
     cmd="claude --dangerously-skip-permissions"
 fi

@@ -27,7 +27,7 @@ Use `-a` to choose which agent runs in the terminal. Default is `claude`.
 ./scripts/run.sh -s work -n -a cursor   # Cursor agent in this session
 ```
 
-The choice is stored in the container's env (`SAFECLAW_AGENT`). Restarting the same container reuses the last agent type. The Cursor CLI is installed in the image; the binary is `agent` and is aliased as `cursor`.
+The choice is stored in the container's env (`SAFECLAW_AGENT`). Restarting the same container reuses the last agent type. The Cursor CLI is installed in the image; the binary is `agent` and is aliased as `cursor-agent`. When launched, it runs with `--model auto --yolo --approve-mcps`.
 
 ## Multiple sessions
 

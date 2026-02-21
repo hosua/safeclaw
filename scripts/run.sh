@@ -231,7 +231,7 @@ if [ -n "$QUERY" ]; then
             tmux set -t main status off
             tmux set -t main mouse on
             cmd="claude --dangerously-skip-permissions"
-            [ "${SAFECLAW_AGENT:-claude}" = "cursor" ] && cmd="cursor"
+            [ "${SAFECLAW_AGENT:-claude}" = "cursor" ] && cmd="cursor-agent --model=auto --yolo --approve-mcps"
             tmux send-keys -t main "$cmd" Enter
         fi
     '
