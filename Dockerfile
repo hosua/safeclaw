@@ -4,7 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=America/Los_Angeles
 ARG NODE_VERSION=24
 ARG PLAYWRIGHT_MCP_VERSION=0.0.62
-ARG CLAUDE_CODE_VERSION=2.1.32
+ARG CLAUDE_CODE_VERSION=2.1.47
 ARG GEMINI_CLI_VERSION=0.26.0
 
 ENV LANG=C.UTF-8
@@ -113,9 +113,7 @@ RUN chmod +x /home/sclaw/ttyd-wrapper.sh
 COPY --chown=sclaw:sclaw setup/skills /home/sclaw/.claude/skills
 COPY --chown=sclaw:sclaw setup/tools /home/sclaw/tools
 
-# === PATCH Claude Code ===
-# DISABLED: Linux x64 hash not yet available in ykdojo/claude-code-tips for 2.1.32
-# The patches enhance Claude's system prompt but aren't critical for SafeClaw to function
+# === PATCH Claude Code === (disabled due to issues)
 
 # RUN mkdir -p /tmp/patches && \
 #     cd /tmp && \

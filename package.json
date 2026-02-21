@@ -5,6 +5,9 @@
   "scripts": {
     "build": "./scripts/build.sh",
     "start": "./scripts/run.sh",
+    "start:claude": "./scripts/run.sh -a claude",
+    "start:cursor": "./scripts/run.sh -a cursor",
+    "mount": "./scripts/run.sh -v",
     "setup-gemini": "./scripts/setup-gemini.sh",
     "setup-slack": "./scripts/setup-slack.sh",
     "dashboard": "node dashboard/server.js",

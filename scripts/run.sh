@@ -97,6 +97,15 @@ else
         VOLUME_FLAGS="$VOLUME_FLAGS -v $VOLUME_MOUNT"
         echo "Mounting volume: $VOLUME_MOUNT"
     fi
+
+    # Mount Chrome extension socket directory for /chrome command
+    # The extension creates sockets at /tmp/claude-mcp-browser-bridge-<user>/
+    CHROME_SOCKET_DIR="/tmp/claude-mcp-browser-bridge-$USER"
+    if [ -d "$CHROME_SOCKET_DIR" ]; then
+        VOLUME_FLAGS="$VOLUME_FLAGS -v $CHROME_SOCKET_DIR:$CHROME_SOCKET_DIR"
+        echo "Mounting Chrome extension socket: $CHROME_SOCKET_DIR"
+    fi
+
     docker run -d --ipc=host --name "$CONTAINER_NAME" -p 127.0.0.1:${PORT}:7681 $VOLUME_FLAGS safeclaw sleep infinity > /dev/null
 fi
 
@@ -167,6 +176,7 @@ for secret_file in "$SECRETS_DIR"/*; do
     fi
 done
 docker exec "$CONTAINER_NAME" sh -c "echo 'export SAFECLAW_AGENT=${AGENT}' >> /home/sclaw/.env"
+docker exec "$CONTAINER_NAME" sh -c "echo '${AGENT}' > /home/sclaw/.safeclaw-agent"
 
 # Set git config from GitHub account if logged in
 if [ -f "$SECRETS_DIR/GH_TOKEN" ]; then
