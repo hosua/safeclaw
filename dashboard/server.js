@@ -160,7 +160,7 @@ function startContainer(name) {
 
         const sessionName = name.replace('safeclaw-', '');
         const title = `SafeClaw - ${sessionName}`;
-        execSync(`docker exec ${envFlags} -d ${name} ttyd -W -t titleFixed="${title}" -p 7681 /home/sclaw/ttyd-wrapper.sh`, { encoding: 'utf8' });
+        execSync(`docker exec -u sclaw ${envFlags} -d ${name} ttyd -W -t titleFixed="${title}" -p 7681 /home/sclaw/ttyd-wrapper.sh`, { encoding: 'utf8' });
 
         // Get the port
         const portInfo = execSync(`docker ps --filter "name=^${name}$" --format "{{.Ports}}"`, { encoding: 'utf8' }).trim();

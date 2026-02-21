@@ -114,8 +114,18 @@ else
         --name $CONTAINER_NAME \
         -p 127.0.0.1:${PORT}:7681 \
         -p 8787:8787 \
+        -e HOST_UID="$(id -u)" \
+        -e HOST_GID="$(id -g)" \
         $VOLUME_FLAGS \
         safeclaw sleep infinity >/dev/null
+
+    sleep 1
+    if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+        echo "Container exited immediately. Logs:"
+        docker logs "$CONTAINER_NAME" 2>&1
+        docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
+        exit 1
+    fi
 fi
 
 # === Claude Code token setup ===
@@ -215,8 +225,8 @@ fi
 # Set title based on session name
 TITLE="SafeClaw - ${SESSION_NAME}"
 
-# Start ttyd with web terminal (pass agent so wrapper inherits it; .env may fail to source)
-docker exec -d -e SAFECLAW_AGENT="$AGENT" "$CONTAINER_NAME" \
+# Start ttyd with web terminal as sclaw (pass agent so wrapper inherits it; .env may fail to source)
+docker exec -u sclaw -d -e SAFECLAW_AGENT="$AGENT" "$CONTAINER_NAME" \
     ttyd -W -t titleFixed="$TITLE" -p 7681 /home/sclaw/ttyd-wrapper.sh
 
 echo ""

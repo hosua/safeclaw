@@ -30,7 +30,6 @@ RUN apt-get update && \
     npm install -g yarn && \
     # clean apt cache
     rm -rf /var/lib/apt/lists/* && \
-    # Create the sclaw user
     adduser sclaw
 
 # === INSTALL Playwright MCP + browsers ===
@@ -112,6 +111,13 @@ RUN chmod +x /home/sclaw/ttyd-wrapper.sh
 # Skills and tools
 COPY --chown=sclaw:sclaw setup/skills /home/sclaw/.claude/skills
 COPY --chown=sclaw:sclaw setup/tools /home/sclaw/tools
+
+# Entrypoint runs as root, remaps sclaw to host UID/GID when HOST_UID/HOST_GID are set, then execs as sclaw
+USER root
+COPY setup/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["sleep", "infinity"]
 
 # === PATCH Claude Code === (disabled due to issues)
 

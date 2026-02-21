@@ -6,7 +6,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 CONTAINER_NAME="safeclaw"
 
 echo "Building image..."
-docker build -t safeclaw "$PROJECT_DIR" || exit 1
+docker build -t safeclaw "$@" "$PROJECT_DIR" || exit 1
 
 # Remove old container so run.sh creates a fresh one from the new image
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
